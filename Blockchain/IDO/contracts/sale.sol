@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
+
 contract Sale is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     /// @dev State variable to check for total fund Raised
     uint256 public fundRaised;
@@ -70,7 +71,7 @@ contract Sale is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
         uint256 _investedAmount = investorContribution[_investor];
         require(_investedAmount > 0, "ERR_NO_TOKENS_TO_CLAIM");
 
-        uint256 _tokensToClaim = _investedAmount * exchangeRate;
+        uint256 _tokensToClaim = _investedAmount * exchangeRate / 1e18;
 
         delete investorContribution[_investor];
 

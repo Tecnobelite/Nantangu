@@ -1,5 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
+require('@openzeppelin/hardhat-upgrades');
 require("dotenv").config();
+require("hardhat-gas-reporter");
 
 module.exports = {
   solidity: {
@@ -17,9 +19,9 @@ module.exports = {
   },
   gasReporter: {
     currency: "USD",
-    gasPrice: 5,
-    enabled: false,
-    // coinmarketcap: process.env.COINMARTKETCAP_API,
+    enabled:  process.env.COIN_MARKET_CAP ? true : false,
+    gasPriceApi : "B1ENPRQW64QZG2GW8DCU3PWXCE1S33XHK6",
+    coinmarketcap: process.env.COIN_MARKET_CAP,
   },
   etherscan: {
     apiKey: {

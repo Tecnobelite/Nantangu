@@ -3,13 +3,15 @@
 pragma solidity 0.8.10;
 
 /// @dev Importing @openzeppelin stuffs.
-import "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
+
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts/proxy/Clones.sol";
 
 import "../interfaces/ISale.sol";
+import "hardhat/console.sol";
 
 /// @dev Struct for Project Details
 struct ProjectDetails {
@@ -82,9 +84,13 @@ contract SaleManager is
         _disableInitializers();
     }
 
-    function initialize() public initializer {
+    function initialize(address _cloneableNormalFairSale) public initializer {
+
+        _validateAddress(_cloneableNormalFairSale);
         __Ownable_init();
         __ReentrancyGuard_init();
+
+        cloneableNormalFairSale = _cloneableNormalFairSale;
     }
 
     function updateNormalPreSale(
@@ -128,18 +134,18 @@ contract SaleManager is
         uint256 _hardCap,
         address _saleToken,
         ProjectDetails memory _projectDetails
-    ) external payable nonReentrant returns (bool) {
+    ) external nonReentrant returns (bool) {
         /// @dev Parameter validations.
         _validateProjectDetails(_projectDetails);
 
-        /// @dev Create PreSale.
-        address _newPreSale = address(
-            new BeaconProxy(cloneableNormalFairSale, "")
-        );
 
+      
+        bytes32 salt = keccak256(abi.encodePacked(msg.sender , _saleToken , block.timestamp));
+        address _newPreSale= Clones.cloneDeterministic(cloneableNormalFairSale, salt);
+       
         ISale(_newPreSale).initialize(_exchangeRate, _hardCap, _saleToken);
 
-        uint256 _tokensRequiredForSale = _hardCap * _exchangeRate;
+        uint256 _tokensRequiredForSale = _hardCap * _exchangeRate / 1e18;
 
         IERC20Upgradeable(_saleToken).transferFrom(
             msg.sender,
@@ -293,7 +299,7 @@ contract SaleManager is
         _validateAddress(_address);
         require(
             preSaleToOwner[_address] != address(0),
-            "PreSaleAddressNotValid"
+            "ERR_SALE_NOT_VALID"
         );
     }
 }
