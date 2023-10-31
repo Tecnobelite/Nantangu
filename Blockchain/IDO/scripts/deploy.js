@@ -4,11 +4,26 @@ const hre = require("hardhat");
 async function main() {
 
 
-  // const lock = await hre.ethers.deployContract("Lock", [unlockTime], {
-  //   value: lockedAmount,
-  // });
+    // Deploying the sale contract
+    const PreSaleFactory = await ethers.getContractFactory('Sale')
+    const PreSale = await PreSaleFactory.deploy()
 
-  // await lock.waitForDeployment();
+ 
+    console.log(PreSale.target);
+
+    // Deploying the manager contract
+    const PreSaleManagerFactory = await ethers.getContractFactory('SaleManager')
+    const PreSaleManager = await upgrades.deployProxy(
+      PreSaleManagerFactory,
+      [PreSale.target],
+      {
+        initializer: 'initialize'
+      }
+    )
+
+    await PreSaleManager.waitForDeployment();
+
+    console.log(PreSaleManager.target);
 
 
 }

@@ -15,7 +15,7 @@ module.exports = {
   },
 
   mocha: {
-    timeout: 100000000,
+    timeout: 10000000000,
   },
   gasReporter: {
     currency: "USD",
